@@ -1,0 +1,1 @@
+web: gunicorn generative_agents.wsgi:application

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AI Agents Studio | Create Account</title>
+    {% load static %}
+    {% csrf_token %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'display': ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        'slate-dark': '#0f172a',
+                        'slate-card': '#1e293b',
+                        'slate-border': '#334155',
+                        'accent-cyan': '#06b6d4',
+                        'accent-teal': '#14b8a6',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px rgba(6, 182, 212, 0.3)' },
+                            '100%': { boxShadow: '0 0 25px rgba(6, 182, 212, 0.5)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            min-height: 100vh;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #0a0f1c 100%) !important;
+            font-family: 'Inter', sans-serif;
+            color: #e2e8f0;
+        }
+        
+        .glass-card-solid {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .input-focus:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+        }
+        
+        .bg-noise {
+            position: relative;
+        }
+        
+        .bg-noise::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .floating-shape {
+            position: fixed;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(20, 184, 166, 0.05) 100%);
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: 0;
+        }
+        
+        .relative-z {
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-noise" style="background: linear-gradient(135deg, #0f172a 0%, #0a0f1c 100%) !important; min-height: 100vh;">
+
+    <!-- Animated Background Shapes -->
+    <div class="floating-shape w-96 h-96 top-20 -left-48 animate-float"></div>
+    <div class="floating-shape w-80 h-80 bottom-20 right-0 animate-float" style="animation-delay: -2s;"></div>
+    <div class="floating-shape w-64 h-64 top-1/2 left-1/3 animate-float" style="animation-delay: -4s;"></div>
+
+    <!-- Main Container - Centered Signup Card Only -->
+    <div class="relative-z min-h-screen flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md">
+            <!-- Signup Card -->
+            <div class="glass-card-solid rounded-2xl shadow-2xl overflow-hidden">
+                <!-- Header with Logo -->
+                <div class="p-6 border-b border-slate-border text-center">
+                    <div class="inline-flex items-center gap-3 mb-4">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-lg animate-glow">
+                                <i class="fas fa-brain text-white text-xl"></i>
+                            </div>
+                            <div class="absolute -inset-1 bg-cyan-500 rounded-xl blur opacity-30 animate-pulse"></div>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-display font-bold">
+                                <span class="gradient-text">AI Agents</span>
+                                <span class="text-white">Studio</span>
+                            </h1>
+                            <p class="text-xs text-cyan-400/70">neural multi-agent orchestration</p>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-display font-semibold text-white">Create Account</h3> 
+                </div>
+                
+                <!-- Signup Form -->
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="text" id="signupName" class="w-full bg-slate-dark/80 border border-slate-border rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 input-focus transition" placeholder="Alex Morgan" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Email Address</label>
+                        <div class="relative">
+                            <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="email" id="signupEmail" class="w-full bg-slate-dark/80 border border-slate-border rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 input-focus transition" placeholder="hello@nexus.ai" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="password" id="signupPassword" class="w-full bg-slate-dark/80 border border-slate-border rounded-xl pl-10 pr-12 py-3 text-white placeholder-gray-500 input-focus transition" placeholder="Create a strong password" required>
+                            <button type="button" id="toggleSignupPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyan-400">
+                                <i class="fas fa-eye-slash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label>
+                        <div class="relative">
+                            <i class="fas fa-check-circle absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="password" id="signupConfirmPassword" class="w-full bg-slate-dark/80 border border-slate-border rounded-xl pl-10 pr-12 py-3 text-white placeholder-gray-500 input-focus transition" placeholder="Confirm password" required>
+                            <button type="button" id="toggleConfirmPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyan-400">
+                                <i class="fas fa-eye-slash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button id="signupBtn" class="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                    
+                    <div class="relative my-4">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-slate-border"></div>
+                        </div>
+                        <div class="relative flex justify-center text-xs">
+                            <span class="px-2 bg-slate-card/80 text-gray-500">Already have an account?</span>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'login_page' %}" class="w-full block text-center border border-cyan-500/50 hover:border-cyan-400 py-3 rounded-xl font-medium transition-all text-cyan-400 hover:text-cyan-300">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Sign In Instead
+                    </a>
+                </div>
+                
+                <div id="authMessage" class="mx-6 mb-6 hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get CSRF token from cookie
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        const csrftoken = getCookie('csrftoken');
+        
+        // Password visibility toggles
+        const toggleSignupPassword = document.getElementById('toggleSignupPassword');
+        const signupPassword = document.getElementById('signupPassword');
+        
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        const confirmPassword = document.getElementById('signupConfirmPassword');
+        
+        const signupBtn = document.getElementById('signupBtn');
+        const authMessageDiv = document.getElementById('authMessage');
+        
+        function showMessage(text, isError = false) {
+            authMessageDiv.classList.remove('hidden');
+            authMessageDiv.className = `mx-6 mb-6 p-3 rounded-xl text-sm ${isError ? 'bg-red-900/30 border border-red-500/30 text-red-400' : 'bg-emerald-900/30 border border-emerald-500/30 text-emerald-400'}`;
+            authMessageDiv.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check-circle'} mr-2"></i>${text}`;
+            setTimeout(() => {
+                authMessageDiv.classList.add('hidden');
+            }, 3000);
+        }
+        
+        async function handleSignup() {
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            const confirmPasswordValue = document.getElementById('signupConfirmPassword').value;
+            
+            if (!name) {
+                showMessage('Please enter your full name', true);
+                return;
+            }
+            if (!email) {
+                showMessage('Please enter a valid email', true);
+                return;
+            }
+            if (!password) {
+                showMessage('Please create a password', true);
+                return;
+            }
+            if (password.length < 4) {
+                showMessage('Password must be at least 4 characters', true);
+                return;
+            }
+            if (password !== confirmPasswordValue) {
+                showMessage('Passwords do not match', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/register/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({
+                        full_name: name,
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Account created successfully! Redirecting to dashboard...', false);
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1200);
+                } else {
+                    showMessage(data.error || 'Registration failed', true);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Network error. Please try again.', true);
+            }
+        }
+        
+        // Toggle for Password field
+        toggleSignupPassword?.addEventListener('click', () => {
+            const type = signupPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            signupPassword.setAttribute('type', type);
+            toggleSignupPassword.innerHTML = type === 'password' ? '<i class="fas fa-eye-slash text-sm"></i>' : '<i class="fas fa-eye text-sm"></i>';
+        });
+        
+        // Toggle for Confirm Password field
+        toggleConfirmPassword?.addEventListener('click', () => {
+            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPassword.setAttribute('type', type);
+            toggleConfirmPassword.innerHTML = type === 'password' ? '<i class="fas fa-eye-slash text-sm"></i>' : '<i class="fas fa-eye text-sm"></i>';
+        });
+        
+        signupBtn?.addEventListener('click', handleSignup);
+        
+        // Enter key support
+        document.getElementById('signupName')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSignup(); });
+        document.getElementById('signupEmail')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSignup(); });
+        document.getElementById('signupPassword')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSignup(); });
+        document.getElementById('signupConfirmPassword')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSignup(); });
+    </script>
+</body>
+</html>

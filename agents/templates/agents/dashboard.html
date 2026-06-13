@@ -1,0 +1,1501 @@
+<!-- agents/templates/agents/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>AI Agents Studio | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #0a0f1c 100%);
+            font-family: 'Inter', sans-serif;
+        }
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #06b6d4;
+            border-radius: 10px;
+        }
+        .glass-sidebar {
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(6, 182, 212, 0.2);
+            transition: transform 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .glass-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 100;
+                width: 280px;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .glass-sidebar.mobile-open {
+                transform: translateX(0);
+                box-shadow: 4px 0 25px rgba(0, 0, 0, 0.5);
+            }
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(4px);
+                z-index: 99;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            }
+            .sidebar-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+            main {
+                width: 100%;
+            }
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            transition: all 0.2s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            background: rgba(30, 41, 59, 0.85);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .nav-active {
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.15) 0%, transparent 100%);
+            border-left: 3px solid #06b6d4;
+        }
+        .agent-card {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 1rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+        .agent-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(6, 182, 212, 0.5);
+            background: rgba(30, 41, 59, 0.95);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        @media (max-width: 640px) {
+            .agent-card {
+                padding: 0.875rem;
+            }
+        }
+        .info-icon {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            width: 28px;
+            height: 28px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+            color: #06b6d4;
+            font-size: 0.75rem;
+        }
+        .info-icon:hover {
+            background: #06b6d4;
+            color: white;
+            transform: scale(1.1);
+        }
+        .tooltip {
+            position: absolute;
+            top: -60px;
+            right: 0;
+            background: #1e293b;
+            border: 1px solid #06b6d4;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            width: 220px;
+            z-index: 100;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            font-size: 0.75rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .info-icon:hover .tooltip {
+            opacity: 1;
+        }
+        .chat-page {
+            display: none;
+            height: calc(100vh - 70px);
+        }
+        .chat-page.active {
+            display: flex;
+        }
+        .agents-grid-page {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+        @media (max-width: 640px) {
+            .agents-grid-page {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 0.75rem;
+            }
+        }
+        .back-btn {
+            transition: all 0.2s ease;
+        }
+        .back-btn:hover {
+            transform: translateX(-4px);
+        }
+        .message-bubble {
+            max-width: 85%;
+            padding: 0.75rem 1rem;
+            border-radius: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 640px) {
+            .message-bubble {
+                max-width: 90%;
+                padding: 0.6rem 0.875rem;
+            }
+        }
+        .message-user {
+            background: linear-gradient(135deg, #06b6d4, #14b8a6);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 0.25rem;
+        }
+        .message-agent {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            margin-right: auto;
+            border-bottom-left-radius: 0.25rem;
+        }
+        .sources-section {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            margin-top: 0.5rem;
+            font-size: 0.7rem;
+            border-left: 3px solid #06b6d4;
+        }
+        .source-link {
+            color: #06b6d4;
+            text-decoration: none;
+            word-break: break-all;
+            display: inline-block;
+            margin: 0.25rem 0;
+        }
+        .source-link:hover {
+            text-decoration: underline;
+            color: #14b8a6;
+        }
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 4px 0;
+        }
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            background: #06b6d4;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-6px); opacity: 1; }
+        }
+        .welcome-message {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(20, 184, 166, 0.08) 100%);
+            border-left: 4px solid #06b6d4;
+        }
+        input, textarea, select {
+            color: #ffffff !important;
+            background-color: #1e293b !important;
+        }
+        input::placeholder, textarea::placeholder {
+            color: #64748b !important;
+        }
+        input:focus, textarea:focus, select:focus {
+            color: #ffffff !important;
+            background-color: #1e293b !important;
+            outline: none !important;
+            border-color: #06b6d4 !important;
+            ring: 2px solid #06b6d4 !important;
+        }
+        select option {
+            background-color: #1e293b !important;
+            color: #ffffff !important;
+        }
+        .message-slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: #1e293b;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 1rem;
+            width: 260px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        @media (max-width: 480px) {
+            .profile-dropdown {
+                width: 240px;
+                right: -10px;
+            }
+        }
+        .profile-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .profile-trigger {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .profile-trigger:hover {
+            background: rgba(6, 182, 212, 0.15);
+            border-color: #06b6d4;
+        }
+        .mobile-menu-btn {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                background: rgba(30, 41, 59, 0.8);
+                border-radius: 10px;
+                border: 1px solid rgba(6, 182, 212, 0.3);
+                cursor: pointer;
+            }
+            .desktop-title {
+                display: none;
+            }
+        }
+        @media (max-width: 768px) {
+            .multi-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            .multi-input-group {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .multi-input-group button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        @media (max-width: 640px) {
+            .chat-header {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+            .chat-header h3 {
+                font-size: 1rem !important;
+            }
+        }
+        @media (max-width: 640px) {
+            .toast-notification {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                text-align: center;
+                border-radius: 0.75rem;
+            }
+        }
+        .edit-name-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .edit-name-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .edit-name-content {
+            background: #1e293b;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .edit-name-modal.active .edit-name-content {
+            transform: scale(1);
+        }
+        .edit-icon {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .edit-icon:hover {
+            color: #06b6d4 !important;
+            transform: scale(1.1);
+        }
+        .search-badge {
+            background: rgba(6, 182, 212, 0.2);
+            border-radius: 9999px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.65rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+       
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .download-btn {
+            transition: all 0.2s ease;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+<div id="authLoading" class="fixed inset-0 bg-slate-dark flex items-center justify-center z-50">
+    <div class="text-center">
+        <div class="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-cyan-400">Authenticating...</p>
+    </div>
+</div>
+
+<div id="mainContent" style="display: none;">
+<div class="flex h-screen overflow-hidden">
+    
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    
+    <aside id="mobileSidebar" class="glass-sidebar w-72 flex-shrink-0 flex flex-col overflow-y-auto custom-scroll">
+        <div class="px-6 py-6 border-b border-slate-border/50">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-lg">
+                        <i class="fas fa-brain text-white text-lg"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-xl font-display font-bold tracking-tight">
+                        <span class="gradient-text">AI Agents</span>
+                        <span class="text-white">Studio</span>
+                    </h1>
+                    <p class="text-xs text-cyan-400/70 mt-0.5">multi-agent orchestration</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="flex-1 px-4 py-6 space-y-1">
+            <div id="navHome" class="nav-active rounded-r-lg py-2.5 px-4 flex items-center gap-3 text-cyan-400 cursor-pointer">
+                <i class="fas fa-home w-5"></i>
+                <span class="font-medium">Agents</span>
+            </div>
+            <div id="navMultiDialogue" class="rounded-r-lg py-2.5 px-4 flex items-center gap-3 text-gray-400 hover:text-cyan-400 transition cursor-pointer">
+                <i class="fas fa-comments w-5"></i>
+                <span>Multi Dialogue</span>
+            </div>
+            <div id="navSignoutSidebar" class="rounded-r-lg py-2.5 px-4 flex items-center gap-3 text-red-400 hover:text-red-300 transition cursor-pointer mt-10">
+                <i class="fas fa-sign-out-alt w-5"></i>
+                <span>Sign Out</span>
+            </div>
+        </nav>
+        
+        <div class="p-4 m-4 rounded-xl glass-card border border-slate-border">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-gray-400 uppercase tracking-wider">System Status</span>
+                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-400">Active Agents</span>
+                <span id="sidebarAgentCount" class="font-mono text-cyan-400">0</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto custom-scroll">
+        <div class="sticky top-0 z-10 bg-slate-dark/80 backdrop-blur-md border-b border-slate-border/50 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div id="mobileMenuBtn" class="mobile-menu-btn">
+                    <i class="fas fa-bars text-cyan-400 text-lg"></i>
+                </div>
+                <div class="desktop-title">
+                    <h2 id="pageTitle" class="text-xl sm:text-2xl font-display font-semibold">AI Agents</h2>
+                    <p id="pageSubtitle" class="text-xs sm:text-sm text-gray-400 mt-0.5 hidden sm:block">Your intelligent conversational companions</p>
+                </div>
+                <div class="sm:hidden">
+                    <h2 id="mobilePageTitle" class="text-lg font-semibold">AI Agents</h2>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="refreshAgentsBtn" class="px-3 sm:px-4 py-2 bg-slate-card hover:bg-slate-border/50 rounded-xl transition flex items-center gap-2 text-xs sm:text-sm border border-slate-border">
+                    <i class="fas fa-sync-alt text-cyan-400 text-xs"></i>
+                    <span class="hidden sm:inline">Refresh</span>
+                    <span class="sm:hidden"><i class="fas fa-rotate-right"></i></span>
+                </button>
+                
+                <div class="relative">
+                    <div id="profileTrigger" class="profile-trigger w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-md cursor-pointer border border-slate-border/50">
+                        <i class="fas fa-user text-white text-xs sm:text-sm"></i>
+                    </div>
+                    <div id="profileDropdown" class="profile-dropdown">
+                        <div class="p-4 border-b border-slate-border/50">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center">
+                                    <i class="fas fa-user text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <p id="dropdownUserName" class="text-sm font-semibold text-white">Loading...</p>
+                                    <p id="dropdownUserEmail" class="text-xs text-gray-400">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="py-2">
+                            <div id="dropdownSignout" class="px-4 py-2 text-sm text-red-400 hover:bg-red-400/10 cursor-pointer transition flex items-center gap-2">
+                                <i class="fas fa-sign-out-alt text-xs"></i>
+                                <span>Sign Out</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="welcomeBanner" class="mx-3 sm:mx-6 mt-4 p-3 sm:p-4 rounded-xl welcome-message" style="display: none;">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                    <i class="fas fa-hand-peace text-cyan-400 text-lg sm:text-xl"></i>
+                </div>
+                <div>
+                    <p id="welcomeText" class="text-cyan-300 font-medium text-sm sm:text-base">Welcome back! 👋</p>
+                    <p class="text-gray-400 text-xs sm:text-sm">Click on any agent to start an intelligent conversation</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="agentsPage" class="p-1 mb-3 sm:p-6">
+            <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(20, 184, 166, 0.05) 100%); border-radius: 1rem; padding: 1rem sm:p-1.5rem; margin-bottom: 1rem sm:mb-1.5rem; border: 1px solid rgba(6, 182, 212, 0.3);">
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #06b6d4, #14b8a6); border-radius: 1rem; padding: 1rem; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-robot" style="color: white; font-size: 1.5rem;"></i>
+                    </div>
+                    <div>
+                        <h1 style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%); -webkit-background-clip: text; background-clip: text; color: transparent;" class="sm:text-2xl">Select an Agent</h1>
+                        <p style="color: #94a3b8; font-size: 0.75rem;" class="sm:text-sm"><i class="fas fa-comments" style="color: #06b6d4;"></i> Choose an AI companion to start an intelligent conversation</p>
+                    </div>
+                </div>
+            </div>
+            <br>
+            
+            <div id="agentsCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"></div>
+        </div>
+
+        <div id="chatPage" class="chat-page"></div>
+
+        <div id="multiDialogueSection" class="hidden p-3 sm:p-6">
+            <div class="glass-card rounded-2xl overflow-hidden border border-slate-border">
+                <div class="bg-slate-card/50 px-4 sm:px-5 py-3 border-b border-slate-border">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <i class="fas fa-comments text-cyan-400 text-lg sm:text-xl"></i>
+                        <h3 class="font-semibold text-base sm:text-lg">Multi-Agent Dialogue Simulator</h3>
+                        <span class="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded-full">AI to AI</span>
+                    </div>
+                </div>
+                <div class="p-4 sm:p-5 space-y-4 sm:space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 multi-grid">
+                        <div>
+                            <label class="block text-xs uppercase text-gray-400 mb-1">
+                                <i class="fas fa-user-astronaut mr-1 text-cyan-400"></i> Agent A
+                            </label>
+                            <select id="convAgentA" class="w-full bg-slate-card border border-slate-border rounded-xl px-3 sm:px-4 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 text-white">
+                                <option value="">Select Agent A</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase text-gray-400 mb-1">
+                                <i class="fas fa-user-robot mr-1 text-cyan-400"></i> Agent B
+                            </label>
+                            <select id="convAgentB" class="w-full bg-slate-card border border-slate-border rounded-xl px-3 sm:px-4 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 text-white">
+                                <option value="">Select Agent B</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase text-gray-400 mb-1">
+                                <i class="fas fa-comment-dots mr-1 text-cyan-400"></i> Initial Message
+                            </label>
+                            <div class="flex gap-2 multi-input-group">
+                                <input type="text" id="initialMessage" class="flex-1 bg-slate-card border border-slate-border rounded-xl px-3 sm:px-4 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 text-white placeholder-gray-400" placeholder="Start the conversation..." value="What do you think about collaboration?">
+                                <button id="startConversationBtn" class="bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 px-4 sm:px-5 rounded-xl flex items-center gap-2 font-medium transition-all whitespace-nowrap">
+                                    <i class="fas fa-play"></i> <span class="hidden sm:inline">Run</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
+                            <span class="text-sm font-mono text-cyan-400">
+                                <i class="fas fa-history mr-1"></i> Dialogue Stream
+                            </span>
+                            <div class="flex gap-2">
+                                <button id="downloadConclusionBtn" class="text-xs bg-slate-card hover:bg-slate-border/50 transition rounded-lg px-2 py-1.5 flex items-center gap-1 download-btn">
+                                    <i class="fas fa-download"></i> <span class="hidden sm:inline">Download Conclusion</span>
+                                </button>
+                                <button id="clearConvoLogBtn" class="text-xs bg-slate-card hover:bg-slate-border/50 transition rounded-lg px-2 py-1.5 flex items-center gap-1">
+                                    <i class="fas fa-trash-alt"></i> <span class="hidden sm:inline">Clear Log</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="conversationLog" class="bg-slate-dark/50 rounded-xl p-3 sm:p-4 h-80 sm:h-96 overflow-y-auto custom-scroll border border-slate-border space-y-2">
+                            <div class="text-center text-gray-500 text-sm py-8">
+                                <i class="fas fa-arrow-down mr-1"></i> Select two agents and click Run to start a conversation
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</div>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    const csrftoken = getCookie('csrftoken');
+    let agentsList = [];
+    let currentAgent = null;
+    let currentUserName = '';
+    let currentUserEmail = '';
+    let lastConclusion = null;
+    let lastAgents = null;
+    let lastTopic = null;
+    
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileSidebar = document.getElementById('mobileSidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    
+    function closeMobileSidebar() {
+        if (mobileSidebar) mobileSidebar.classList.remove('mobile-open');
+        if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+    }
+    
+    function openMobileSidebar() {
+        if (mobileSidebar) mobileSidebar.classList.add('mobile-open');
+        if (sidebarOverlay) sidebarOverlay.classList.add('active');
+    }
+    
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', openMobileSidebar);
+    }
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeMobileSidebar);
+    }
+    
+    function updateMobileTitle(title) {
+        const mobileTitle = document.getElementById('mobilePageTitle');
+        if (mobileTitle) mobileTitle.innerText = title;
+    }
+    
+    async function checkAuth() {
+        try {
+            const response = await fetch('/api/check-auth/', {
+                headers: { 'X-CSRFToken': csrftoken }
+            });
+            const data = await response.json();
+            
+            if (data.authenticated) {
+                currentUserName = data.user.full_name;
+                currentUserEmail = data.user.email;
+                
+                const dropdownUserName = document.getElementById('dropdownUserName');
+                const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+                if (dropdownUserName) dropdownUserName.innerText = currentUserName;
+                if (dropdownUserEmail) dropdownUserEmail.innerText = currentUserEmail;
+                
+                const welcomeBanner = document.getElementById('welcomeBanner');
+                const welcomeText = document.getElementById('welcomeText');
+                welcomeText.innerHTML = `Welcome back, ${currentUserName.split(' ')[0]}! 👋`;
+                welcomeBanner.style.display = 'block';
+                
+                setTimeout(() => {
+                    welcomeBanner.style.opacity = '0';
+                    setTimeout(() => {
+                        welcomeBanner.style.display = 'none';
+                        welcomeBanner.style.opacity = '1';
+                    }, 500);
+                }, 5000);
+                
+                document.getElementById('authLoading').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                fetchAgents();
+            } else {
+                window.location.href = '/login/';
+            }
+        } catch (error) {
+            console.error('Auth error:', error);
+            window.location.href = '/login/';
+        }
+    }
+    
+    async function signout() {
+        try {
+            await fetch('/api/signout/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrftoken }
+            });
+            window.location.href = '/login/';
+        } catch (error) {
+            console.error('Signout error:', error);
+            window.location.href = '/login/';
+        }
+    }
+    
+    async function fetchAgents() {
+        const refreshBtn = document.getElementById('refreshAgentsBtn');
+        const originalText = refreshBtn.innerHTML;
+        
+        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-pulse text-cyan-400 text-xs"></i><span class="hidden sm:inline">Refreshing...</span>';
+        refreshBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/api/agents/', {
+                headers: { 'X-CSRFToken': csrftoken }
+            });
+            const data = await response.json();
+            agentsList = data.agents || [];
+            renderAgentCards();
+            updateSelectors();
+            document.getElementById('sidebarAgentCount').innerText = agentsList.length;
+            showToast('Agents refreshed successfully!', 'success');
+        } catch (error) {
+            console.error('Error fetching agents:', error);
+            showToast('Failed to refresh agents', 'error');
+        } finally {
+            refreshBtn.innerHTML = originalText;
+            refreshBtn.disabled = false;
+        }
+    }
+    
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-4 right-4 left-4 sm:left-auto px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 toast-notification ${
+            type === 'success' ? 'bg-emerald-500/90 text-white' : 'bg-red-500/90 text-white'
+        }`;
+        toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>${message}`;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function renderAgentCards() {
+        const grid = document.getElementById('agentsCardsGrid');
+        if (!agentsList.length) {
+            grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-12 text-sm sm:text-base">No agents available. Create your first agent!</div>';
+            return;
+        }
+        
+        grid.innerHTML = agentsList.map(agent => `
+            <div class="agent-card" data-agent-id="${agent.id}" data-agent-name="${agent.name}">
+                <div class="info-icon">
+                    <i class="fas fa-info-circle text-xs"></i>
+                    <div class="tooltip">
+                        <div class="font-semibold text-cyan-400 mb-1">${escapeHtml(agent.name)}</div>
+                        <div class="text-gray-300 text-xs mb-1">Age: ${agent.age}</div>
+                        <div class="text-gray-400 text-xs">${escapeHtml(agent.description || 'No description')}</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${agent.color || 'from-cyan-500-to-teal-500'} flex items-center justify-center shadow-md">
+                        <i class="${agent.avatar || 'fas fa-robot'} text-white text-base sm:text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-white text-base sm:text-lg">${escapeHtml(agent.name)}</h3>
+                            <i class="fas fa-pencil-alt edit-icon text-gray-400 text-xs hover:text-cyan-400" 
+                               data-agent-id="${agent.id}" 
+                               data-agent-name="${escapeHtml(agent.name)}"
+                               style="cursor: pointer;"></i>
+                        </div>
+                        <p class="text-xs text-gray-400">${escapeHtml(agent.traits?.split(',')[0] || 'Agent')}</p>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 line-clamp-2 mb-3">${escapeHtml(agent.description || 'Click to start chatting')}</p>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-cyan-400"><i class="fas fa-brain mr-1"></i> ${agent.age} yrs</span>
+                    <span class="px-2 py-0.5 rounded-full ${agent.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-gray-400'}">${agent.status}</span>
+                </div>
+            </div>
+        `).join('');
+        
+        document.querySelectorAll('.agent-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.info-icon')) return;
+                if (e.target.classList.contains('edit-icon')) return;
+                const agentId = parseInt(card.dataset.agentId);
+                const agent = agentsList.find(a => a.id === agentId);
+                if (agent) openChatWithAgent(agent);
+            });
+        });
+        
+        document.querySelectorAll('.edit-icon').forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const agentId = parseInt(icon.dataset.agentId);
+                const currentName = icon.dataset.agentName;
+                showEditNameModal(agentId, currentName);
+            });
+        });
+    }
+    
+    function updateSelectors() {
+        const selectA = document.getElementById('convAgentA');
+        const selectB = document.getElementById('convAgentB');
+        if (!selectA || !selectB) return;
+        
+        selectA.innerHTML = '<option value="">Select Agent A</option>';
+        selectB.innerHTML = '<option value="">Select Agent B</option>';
+        
+        agentsList.forEach(agent => {
+            selectA.add(new Option(agent.name, agent.id));
+            selectB.add(new Option(agent.name, agent.id));
+        });
+    }
+    
+    function switchView(view) {
+        const agentsPage = document.getElementById('agentsPage');
+        const chatPage = document.getElementById('chatPage');
+        const multiSection = document.getElementById('multiDialogueSection');
+        const pageTitle = document.getElementById('pageTitle');
+        const pageSubtitle = document.getElementById('pageSubtitle');
+        const mobilePageTitle = document.getElementById('mobilePageTitle');
+        const navHome = document.getElementById('navHome');
+        const navMulti = document.getElementById('navMultiDialogue');
+        
+        closeMobileSidebar();
+        
+        if (view === 'agents') {
+            agentsPage.style.display = 'block';
+            chatPage.style.display = 'none';
+            multiSection.classList.add('hidden');
+            pageTitle.innerText = 'AI Agents';
+            pageSubtitle.innerText = 'Your intelligent conversational companions';
+            if (mobilePageTitle) mobilePageTitle.innerText = 'AI Agents';
+            navHome.classList.add('nav-active', 'text-cyan-400');
+            navMulti.classList.remove('nav-active', 'text-cyan-400');
+            navMulti.classList.add('text-gray-400');
+            fetchAgents();
+        } else if (view === 'multi') {
+            agentsPage.style.display = 'none';
+            chatPage.style.display = 'none';
+            multiSection.classList.remove('hidden');
+            pageTitle.innerText = 'Multi Dialogue';
+            pageSubtitle.innerText = 'Simulate conversations between two agents';
+            if (mobilePageTitle) mobilePageTitle.innerText = 'Multi Dialogue';
+            navMulti.classList.add('nav-active', 'text-cyan-400');
+            navHome.classList.remove('nav-active', 'text-cyan-400');
+            navHome.classList.add('text-gray-400');
+            updateSelectors();
+        }
+    }
+    
+    // Function to display sources in the chat
+    function displaySources(sources) {
+        if (!sources || sources.length === 0) return '';
+        
+        let sourcesHtml = '<div class="sources-section">';
+        sourcesHtml += '<div class="flex items-center gap-1 mb-1"><i class="fas fa-link text-cyan-400 text-xs"></i><span class="text-xs text-gray-400">Sources:</span></div>';
+        
+        sources.forEach(source => {
+            sourcesHtml += `<div><a href="${escapeHtml(source.url)}" target="_blank" class="source-link text-xs">🔗 ${escapeHtml(source.title || source.url)}</a></div>`;
+        });
+        
+        sourcesHtml += '</div>';
+        return sourcesHtml;
+    }
+    
+    async function openChatWithAgent(agent) {
+        currentAgent = agent;
+        const agentsPage = document.getElementById('agentsPage');
+        const chatPage = document.getElementById('chatPage');
+        const mobilePageTitle = document.getElementById('mobilePageTitle');
+        
+        agentsPage.style.display = 'none';
+        chatPage.style.display = 'flex';
+        chatPage.classList.add('active');
+        document.getElementById('pageTitle').innerText = `Chat with ${agent.name}`;
+        if (mobilePageTitle) mobilePageTitle.innerText = `Chat with ${agent.name}`;
+        document.getElementById('pageSubtitle').innerText = agent.description || 'Ask me anything! (Web search enabled for questions)';
+        
+        chatPage.innerHTML = `
+            <div class="flex flex-col h-full w-full">
+                <div class="bg-slate-card/50 border-b border-slate-border px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between sticky top-0 chat-header">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <button id="backToAgentsBtn" class="text-gray-400 hover:text-cyan-400 transition mr-1 sm:mr-2">
+                            <i class="fas fa-arrow-left text-lg sm:text-xl"></i>
+                        </button>
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br ${agent.color} flex items-center justify-center">
+                            <i class="${agent.avatar} text-white text-xs sm:text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-sm sm:text-base">${escapeHtml(agent.name)}</h3>
+                            <p class="text-xs text-gray-400 hidden sm:block">${escapeHtml(agent.traits || 'AI Agent')}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="search-badge hidden sm:flex"><i class="fas fa-globe text-cyan-400 text-xs"></i> Web Search</span>
+                        <button id="clearChatBtn" class="text-gray-400 hover:text-red-400 transition">
+                            <i class="fas fa-trash-alt text-sm sm:text-base"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="chatMessagesContainer" class="flex-1 overflow-y-auto custom-scroll px-3 sm:px-6 py-3 sm:py-4 space-y-3">
+                    <div class="text-center text-gray-500 text-sm py-8">
+                        <i class="fas fa-comment-dots text-2xl mb-2 block"></i>
+                        Start a conversation with ${agent.name}<br>
+                        <span class="text-xs text-cyan-400">Ask factual questions like "Who is the founder of Pakistan?" and see the sources!</span>
+                    </div>
+                </div>
+                
+                <div class="border-t border-slate-border bg-slate-card/30">
+                    <button id="toggleMemoryBtn" class="w-full px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-between text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition">
+                        <span><i class="fas fa-brain mr-2"></i> Implant Memory</span>
+                        <i id="memoryToggleIcon" class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    <div id="memoryPanel" class="hidden px-4 sm:px-6 pb-4">
+                        <div class="flex gap-2">
+                            <input type="text" id="memoryInput" class="flex-1 bg-slate-card border border-slate-border rounded-xl px-3 sm:px-4 py-2 text-sm focus:ring-2 focus:ring-cyan-500 text-white placeholder-gray-500" placeholder="Add a memory for ${agent.name}...">
+                            <button id="addMemoryBtn" class="bg-teal-600/80 hover:bg-teal-600 px-3 sm:px-4 rounded-xl transition">
+                                <i class="fas fa-save text-sm"></i>
+                            </button>
+                        </div>
+                        <div id="memoryFeedback" class="text-xs mt-2 text-cyan-400"></div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-slate-border p-3 sm:p-4 bg-slate-card/30">
+                    <div class="flex gap-2 sm:gap-3">
+                        <input type="text" id="chatInput" class="flex-1 bg-slate-card border border-slate-border rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm focus:ring-2 focus:ring-cyan-500 text-white placeholder-gray-400" placeholder="Type your message... (Try: Who is the founder of Pakistan?)">
+                        <button id="sendMessageBtn" class="bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 px-4 sm:px-6 rounded-xl flex items-center gap-2 font-medium text-sm">
+                            <i class="fas fa-paper-plane"></i> <span class="hidden sm:inline">Send</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('backToAgentsBtn')?.addEventListener('click', () => switchView('agents'));
+        
+        document.getElementById('clearChatBtn')?.addEventListener('click', () => {
+            const container = document.getElementById('chatMessagesContainer');
+            container.innerHTML = `<div class="text-center text-gray-500 text-sm py-8">Start a conversation with ${agent.name}<br><span class="text-xs text-cyan-400">Ask factual questions and see the sources!</span></div>`;
+            showToast('Chat cleared!', 'success');
+        });
+        
+        const toggleBtn = document.getElementById('toggleMemoryBtn');
+        const memoryPanel = document.getElementById('memoryPanel');
+        const memoryIcon = document.getElementById('memoryToggleIcon');
+        
+        toggleBtn?.addEventListener('click', () => {
+            memoryPanel.classList.toggle('hidden');
+            memoryIcon.classList.toggle('fa-chevron-down');
+            memoryIcon.classList.toggle('fa-chevron-up');
+        });
+        
+        const addMemoryBtn = document.getElementById('addMemoryBtn');
+        const memoryInput = document.getElementById('memoryInput');
+        const memoryFeedback = document.getElementById('memoryFeedback');
+        
+        addMemoryBtn?.addEventListener('click', async () => {
+            const memoryText = memoryInput.value.trim();
+            if (!memoryText) {
+                memoryFeedback.innerHTML = '<span class="text-amber-400">Enter memory content</span>';
+                return;
+            }
+            
+            memoryFeedback.innerHTML = '<span class="text-cyan-400"><i class="fas fa-spinner fa-pulse"></i> encoding...</span>';
+            
+            try {
+                const response = await fetch('/api/memory/add/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({
+                        agent_id: agent.id,
+                        memory_text: memoryText
+                    })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    memoryFeedback.innerHTML = `<span class="text-emerald-400"><i class="fas fa-check-circle"></i> Memory stored: "${escapeHtml(memoryText.substring(0, 50))}"</span>`;
+                    memoryInput.value = '';
+                    setTimeout(() => memoryFeedback.innerHTML = '', 2000);
+                    showToast(`Memory implanted in ${agent.name}!`, 'success');
+                } else {
+                    memoryFeedback.innerHTML = '<span class="text-red-400">Failed to store memory</span>';
+                }
+            } catch (error) {
+                memoryFeedback.innerHTML = '<span class="text-red-400">Network error</span>';
+            }
+        });
+        
+        const sendBtn = document.getElementById('sendMessageBtn');
+        const chatInput = document.getElementById('chatInput');
+        const messagesContainer = document.getElementById('chatMessagesContainer');
+        
+        async function sendMessage() {
+            const msg = chatInput.value.trim();
+            if (!msg) return;
+            
+            const userDiv = document.createElement('div');
+            userDiv.className = 'message-bubble message-user';
+            userDiv.innerHTML = `<div class="text-xs opacity-70 mb-1">${escapeHtml(currentUserName.split(' ')[0])}</div><div class="text-sm">${escapeHtml(msg)}</div>`;
+            messagesContainer.appendChild(userDiv);
+            chatInput.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            const placeholder = messagesContainer.querySelector('.text-center');
+            if (placeholder) placeholder.remove();
+            
+            const typingId = 'typing-' + Date.now();
+            const typingDiv = document.createElement('div');
+            typingDiv.id = typingId;
+            typingDiv.className = 'message-bubble message-agent';
+            typingDiv.innerHTML = `<div class="text-xs text-cyan-400 mb-1">${escapeHtml(agent.name)} <span class="text-gray-500 text-xs ml-1"><i class="fas fa-spinner fa-pulse"></i> searching web...</span></div><div class="typing-indicator"><span></span><span></span><span></span></div>`;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            try {
+                const response = await fetch('/api/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({
+                        agent_id: agent.id,
+                        message: msg,
+                        enable_search: true
+                    })
+                });
+                const data = await response.json();
+                
+                const typingEl = document.getElementById(typingId);
+                if (typingEl) typingEl.remove();
+                
+                if (data.success) {
+                    const agentDiv = document.createElement('div');
+                    agentDiv.className = 'message-bubble message-agent';
+                    
+                    let responseHtml = `<div class="text-xs text-cyan-400 mb-1">${escapeHtml(agent.name)}`;
+                    if (data.search_enabled && data.has_sources) {
+                        responseHtml += ` <span class="text-gray-500 text-xs ml-1"><i class="fas fa-globe"></i> web search</span>`;
+                    }
+                    responseHtml += `</div>`;
+                    responseHtml += `<div class="text-sm leading-relaxed">${escapeHtml(data.response)}</div>`;
+                    
+                    if (data.sources && data.sources.length > 0) {
+                        responseHtml += displaySources(data.sources);
+                    }
+                    
+                    agentDiv.innerHTML = responseHtml;
+                    messagesContainer.appendChild(agentDiv);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    
+                    if (data.has_sources) {
+                        showToast(`Found ${data.sources.length} source(s) for your question!`, 'success');
+                    }
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                const typingEl = document.getElementById(typingId);
+                if (typingEl) typingEl.remove();
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'message-bubble message-agent';
+                errorDiv.innerHTML = `<div class="text-xs text-cyan-400 mb-1">${escapeHtml(agent.name)}</div><div class="text-sm text-red-400">Error: ${error.message || 'Could not get response'}</div>`;
+                messagesContainer.appendChild(errorDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+        
+        sendBtn?.addEventListener('click', sendMessage);
+        chatInput?.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    }
+    
+    // Download conclusion function
+    function downloadConclusion() {
+        if (!lastConclusion) {
+            showToast('No conclusion available to download. Please run a conversation first.', 'error');
+            return;
+        }
+        
+        const content = `AI Agents Dialogue Conclusion\n\n` +
+            `Agents: ${lastAgents}\n` +
+            `Topic: ${lastTopic}\n` +
+            `Date: ${new Date().toLocaleString()}\n\n` +
+            `═══════════════════════════════════════\n` +
+            `CONCLUSION:\n` +
+            `═══════════════════════════════════════\n\n` +
+            `${lastConclusion}\n\n` +
+            `═══════════════════════════════════════\n` +
+            `End of Dialogue Report\n` +
+            `Generated by AI Agents Studio`;
+        
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `agent_conclusion_${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showToast('Conclusion downloaded successfully!', 'success');
+    }
+    
+    const startConvoBtn = document.getElementById('startConversationBtn');
+    if (startConvoBtn) {
+        startConvoBtn.addEventListener('click', async () => {
+            const agentAId = document.getElementById('convAgentA').value;
+            const agentBId = document.getElementById('convAgentB').value;
+            const topic = document.getElementById('initialMessage').value.trim();
+            const logDiv = document.getElementById('conversationLog');
+            
+            if (!agentAId) {
+                logDiv.innerHTML = '<div class="text-center text-red-400 text-sm py-8"><i class="fas fa-exclamation-triangle mr-2"></i>Please select Agent A</div>';
+                showToast('Please select Agent A', 'error');
+                return;
+            }
+            if (!agentBId) {
+                logDiv.innerHTML = '<div class="text-center text-red-400 text-sm py-8"><i class="fas fa-exclamation-triangle mr-2"></i>Please select Agent B</div>';
+                showToast('Please select Agent B', 'error');
+                return;
+            }
+            if (agentAId === agentBId) {
+                logDiv.innerHTML = '<div class="text-center text-red-400 text-sm py-8"><i class="fas fa-exclamation-triangle mr-2"></i>Please select two different agents</div>';
+                showToast('Please select two different agents', 'error');
+                return;
+            }
+            if (!topic) {
+                logDiv.innerHTML = '<div class="text-center text-red-400 text-sm py-8"><i class="fas fa-exclamation-triangle mr-2"></i>Please enter an initial message</div>';
+                showToast('Please enter an initial message', 'error');
+                return;
+            }
+            
+            const agentA = agentsList.find(a => a.id == agentAId);
+            const agentB = agentsList.find(a => a.id == agentBId);
+            
+            if (!agentA || !agentB) {
+                logDiv.innerHTML = '<div class="text-center text-red-400 text-sm py-8">Agent not found</div>';
+                return;
+            }
+            
+            // Store for download
+            lastAgents = `${agentA.name} & ${agentB.name}`;
+            lastTopic = topic;
+            
+            logDiv.innerHTML = `<div class="text-center text-cyan-400 text-sm py-8">
+                <i class="fas fa-spinner fa-pulse text-2xl mb-2 block"></i>
+                Generating conversation between ${escapeHtml(agentA.name)} and ${escapeHtml(agentB.name)}...
+            </div>`;
+            
+            try {
+                const response = await fetch('/api/agent-conversation/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({
+                        agent1_id: parseInt(agentAId),
+                        agent2_id: parseInt(agentBId),
+                        topic: topic
+                    })
+                });
+                const data = await response.json();
+                
+                if (data.conversation && data.conversation.length > 0) {
+                    logDiv.innerHTML = '';
+                    
+                    // Add conversation header
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'mb-4 p-3 bg-gradient-to-r from-cyan-500/10 to-teal-500/10 rounded-xl border border-cyan-500/30 message-slide-in';
+                    headerDiv.innerHTML = `
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-comments text-cyan-400"></i>
+                            <span class="text-xs font-semibold text-cyan-400 uppercase tracking-wider">CONVERSATION STREAM</span>
+                        </div>
+                        <div class="text-xs text-gray-400">
+                            <i class="fas fa-tag mr-1"></i> Topic: "${escapeHtml(topic)}"
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-clock mr-1"></i> ${new Date().toLocaleString()}
+                        </div>
+                    `;
+                    logDiv.appendChild(headerDiv);
+                    
+                    const initialMsg = data.conversation[0];
+                    const colonIndexInitial = initialMsg.indexOf(': ');
+                    const speakerInitial = initialMsg.substring(0, colonIndexInitial);
+                    const contentInitial = initialMsg.substring(colonIndexInitial + 2);
+                    const isAgentAInitial = speakerInitial === agentA.name;
+                    const borderColorInitial = isAgentAInitial ? 'border-l-cyan-500' : 'border-l-teal-500';
+                    const iconInitial = isAgentAInitial ? '<i class="fas fa-user-astronaut mr-1"></i>' : '<i class="fas fa-user-robot mr-1"></i>';
+                    
+                    const initialDiv = document.createElement('div');
+                    initialDiv.className = `bg-slate-card/40 rounded-lg p-3 border-l-2 ${borderColorInitial} message-slide-in`;
+                    initialDiv.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <span class="font-mono text-xs font-semibold ${isAgentAInitial ? 'text-cyan-400' : 'text-teal-400'}">${iconInitial} ${escapeHtml(speakerInitial)}</span>
+                            <span class="text-[10px] text-gray-500">Turn 1</span>
+                        </div>
+                        <div class="text-sm mt-2 text-gray-300 leading-relaxed">${escapeHtml(contentInitial)}</div>
+                    `;
+                    logDiv.appendChild(initialDiv);
+                    logDiv.scrollTop = logDiv.scrollHeight;
+                    
+                    for (let i = 1; i < data.conversation.length; i++) {
+                        const msg = data.conversation[i];
+                        const colonIndex = msg.indexOf(': ');
+                        const speaker = msg.substring(0, colonIndex);
+                        const content = msg.substring(colonIndex + 2);
+                        const isAgentA = speaker === agentA.name;
+                        const borderColor = isAgentA ? 'border-l-cyan-500' : 'border-l-teal-500';
+                        const icon = isAgentA ? '<i class="fas fa-user-astronaut mr-1"></i>' : '<i class="fas fa-user-robot mr-1"></i>';
+                        
+                        const msgDiv = document.createElement('div');
+                        msgDiv.className = `bg-slate-card/40 rounded-lg p-3 border-l-2 ${borderColor} message-slide-in`;
+                        msgDiv.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <span class="font-mono text-xs font-semibold ${isAgentA ? 'text-cyan-400' : 'text-teal-400'}">${icon} ${escapeHtml(speaker)}</span>
+                                <span class="text-[10px] text-gray-500">Turn ${i+1}</span>
+                            </div>
+                            <div class="text-sm mt-2 text-gray-300 leading-relaxed">${escapeHtml(content)}</div>
+                        `;
+                        
+                        logDiv.appendChild(msgDiv);
+                        logDiv.scrollTop = logDiv.scrollHeight;
+                        await new Promise(resolve => setTimeout(resolve, 800));
+                    }
+                    
+                    // Add conclusion section if available
+                    if (data.conclusion) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        lastConclusion = data.conclusion;
+                        
+                        const conclusionDiv = document.createElement('div');
+                        conclusionDiv.className = 'mt-6 p-4 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 rounded-xl border-2 border-cyan-500/40 message-slide-in conclusion-pulse';
+                        conclusionDiv.innerHTML = `
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-8 h-8 rounded-full bg-cyan-500/30 flex items-center justify-center">
+                                    <i class="fas fa-clipboard-list text-cyan-400 text-sm"></i>
+                                </div>
+                                <span class="font-bold text-cyan-400 text-sm uppercase tracking-wider">📋 Conversation Conclusion</span>
+                            </div>
+                            <div class="text-sm text-gray-200 leading-relaxed">
+                                ${escapeHtml(data.conclusion)}
+                            </div>
+                            <div class="mt-3 pt-2 border-t border-cyan-500/30 flex items-center justify-between">
+                                <span class="text-xs text-gray-400">
+                                    <i class="fas fa-robot mr-1"></i> ${escapeHtml(agentA.name)} & ${escapeHtml(agentB.name)}
+                                </span>
+                                <span class="text-xs text-cyan-400">
+                                    <i class="fas fa-check-circle mr-1"></i> Analysis Complete
+                                </span>
+                            </div>
+                        `;
+                        logDiv.appendChild(conclusionDiv);
+                        logDiv.scrollTop = logDiv.scrollHeight;
+                        
+                        showToast('✨ Conversation completed with AI-generated conclusion!', 'success');
+                    } else {
+                        lastConclusion = null;
+                        showToast('Conversation completed!', 'success');
+                    }
+                } else {
+                    logDiv.innerHTML = `<div class="text-center text-red-400 text-sm py-8">Error: ${data.error || 'Failed to generate conversation'}</div>`;
+                    showToast('Failed to generate conversation', 'error');
+                }
+            } catch (error) {
+                console.error('Conversation error:', error);
+                logDiv.innerHTML = '<div class="text-center text-red-400 text-sm py-8"><i class="fas fa-wifi mr-2"></i>Network error. Please try again.</div>';
+                showToast('Network error. Please try again.', 'error');
+            }
+        });
+    }
+    
+    const clearConvoBtn = document.getElementById('clearConvoLogBtn');
+    if (clearConvoBtn) {
+        clearConvoBtn.addEventListener('click', () => {
+            document.getElementById('conversationLog').innerHTML = '<div class="text-center text-gray-500 text-sm py-8"><i class="fas fa-arrow-down mr-1"></i> Select two agents and click Run to start a conversation</div>';
+            lastConclusion = null;
+            lastAgents = null;
+            lastTopic = null;
+            showToast('Conversation log cleared!', 'success');
+        });
+    }
+    
+    const downloadBtn = document.getElementById('downloadConclusionBtn');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', downloadConclusion);
+    }
+    
+    const profileTrigger = document.getElementById('profileTrigger');
+    const profileDropdown = document.getElementById('profileDropdown');
+    
+    if (profileTrigger && profileDropdown) {
+        profileTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('show');
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!profileTrigger.contains(e.target) && !profileDropdown.contains(e.target)) {
+                profileDropdown.classList.remove('show');
+            }
+        });
+    }
+    
+    const dropdownSignout = document.getElementById('dropdownSignout');
+    if (dropdownSignout) {
+        dropdownSignout.addEventListener('click', signout);
+    }
+    
+    const navSignoutSidebar = document.getElementById('navSignoutSidebar');
+    if (navSignoutSidebar) {
+        navSignoutSidebar.addEventListener('click', signout);
+    }
+    
+    document.getElementById('navHome')?.addEventListener('click', () => switchView('agents'));
+    document.getElementById('navMultiDialogue')?.addEventListener('click', () => switchView('multi'));
+    document.getElementById('refreshAgentsBtn')?.addEventListener('click', fetchAgents);
+    
+    const modalHTML = `
+    <div id="editNameModal" class="edit-name-modal">
+        <div class="edit-name-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-white">
+                    <i class="fas fa-pencil-alt text-cyan-400 mr-2"></i>
+                    Edit Agent Name
+                </h3>
+                <button id="closeNameModal" class="text-gray-400 hover:text-white transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm text-gray-400 mb-2">New Name</label>
+                <input type="text" id="newAgentName" class="w-full bg-slate-card border border-slate-border rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-cyan-500" placeholder="Enter new name">
+            </div>
+            <div class="flex gap-3">
+                <button id="cancelNameEdit" class="flex-1 px-4 py-2 bg-slate-card border border-slate-border rounded-xl text-gray-400 hover:text-white transition">
+                    Cancel
+                </button>
+                <button id="saveNameEdit" class="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 rounded-xl text-white font-medium transition">
+                    Save Changes
+                </button>
+            </div>
+            <div id="nameEditError" class="text-red-400 text-sm mt-3 hidden"></div>
+        </div>
+    </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    let currentEditingAgentId = null;
+    
+    function showEditNameModal(agentId, currentName) {
+        currentEditingAgentId = agentId;
+        const modal = document.getElementById('editNameModal');
+        const input = document.getElementById('newAgentName');
+        const errorDiv = document.getElementById('nameEditError');
+        
+        input.value = currentName;
+        errorDiv.classList.add('hidden');
+        modal.classList.add('active');
+        input.focus();
+    }
+    
+    function closeEditNameModal() {
+        const modal = document.getElementById('editNameModal');
+        modal.classList.remove('active');
+        currentEditingAgentId = null;
+    }
+    
+    async function saveAgentName() {
+        const newName = document.getElementById('newAgentName').value.trim();
+        const errorDiv = document.getElementById('nameEditError');
+        
+        if (!newName) {
+            errorDiv.textContent = 'Name cannot be empty';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        
+        if (newName.length > 100) {
+            errorDiv.textContent = 'Name must be less than 100 characters';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        
+        errorDiv.classList.add('hidden');
+        
+        try {
+            const response = await fetch('/api/agent/update-name/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    agent_id: currentEditingAgentId,
+                    name: newName
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const agentIndex = agentsList.findIndex(a => a.id === currentEditingAgentId);
+                if (agentIndex !== -1) {
+                    agentsList[agentIndex].name = newName;
+                }
+                
+                if (currentAgent && currentAgent.id === currentEditingAgentId) {
+                    currentAgent.name = newName;
+                    const pageTitle = document.getElementById('pageTitle');
+                    const mobilePageTitle = document.getElementById('mobilePageTitle');
+                    if (pageTitle) pageTitle.innerText = `Chat with ${newName}`;
+                    if (mobilePageTitle) mobilePageTitle.innerText = `Chat with ${newName}`;
+                }
+                
+                renderAgentCards();
+                updateSelectors();
+                document.getElementById('sidebarAgentCount').innerText = agentsList.length;
+                
+                showToast(`Agent renamed to "${newName}" successfully!`, 'success');
+                closeEditNameModal();
+            } else {
+                errorDiv.textContent = data.error || 'Failed to update name';
+                errorDiv.classList.remove('hidden');
+            }
+        } catch (error) {
+            errorDiv.textContent = 'Network error. Please try again.';
+            errorDiv.classList.remove('hidden');
+            console.error('Error updating agent name:', error);
+        }
+    }
+    
+    document.getElementById('closeNameModal')?.addEventListener('click', closeEditNameModal);
+    document.getElementById('cancelNameEdit')?.addEventListener('click', closeEditNameModal);
+    document.getElementById('saveNameEdit')?.addEventListener('click', saveAgentName);
+    
+    document.getElementById('editNameModal')?.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('editNameModal')) {
+            closeEditNameModal();
+        }
+    });
+    
+    document.getElementById('newAgentName')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            saveAgentName();
+        }
+    });
+    
+    checkAuth();
+</script>
+</body>
+</html>
