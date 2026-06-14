@@ -191,7 +191,6 @@ python-magic==0.4.27
 python-oxmsg==0.0.2
 pytube==15.0.0
 pytz==2025.2
-pywin32
 PyYAML==6.0.2
 pyzmq==27.0.0
 RapidFuzz==3.13.0
